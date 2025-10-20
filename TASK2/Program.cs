@@ -70,15 +70,6 @@ public struct ComplexNumber
         else
             Console.WriteLine($"{Real} - {Math.Abs(Imaginary)}i");
     }
-
-    // Переопределение ToString для удобного вывода
-    public override string ToString()
-    {
-        if (Imaginary >= 0)
-            return $"{Real} + {Imaginary}i";
-        else
-            return $"{Real} - {Math.Abs(Imaginary)}i";
-    }
 }
 
 class Program
@@ -198,4 +189,5 @@ class Program
         Console.WriteLine("Введите второе комплексное число:");
         return InputComplexNumber();
     }
+
 }
