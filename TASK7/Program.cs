@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-// Класс для представления заявки
+// класс для представления заявки
 public class Request
 {
-    public int Priority { get; set; }     // Приоритет (1-5)
-    public int RequestId { get; set; }    // Номер заявки (сквозная нумерация)
-    public int StepAdded { get; set; }    // Шаг, на котором заявка добавлена
+    public int Priority { get; set; }     // приоритет (1-5)
+    public int RequestId { get; set; }    // номер заявки (сквозная нумерация)
+    public int StepAdded { get; set; }    // шаг, на котором заявка добавлена
 
     public Request(int priority, int requestId, int stepAdded)
     {
@@ -17,14 +17,14 @@ public class Request
         StepAdded = stepAdded;
     }
 
-    // Для удобства вывода
+    // для удобства вывода
     public override string ToString()
     {
         return $"Заявка {RequestId} (Приоритет: {Priority}, Добавлена на шаге: {StepAdded})";
     }
 }
 
-// Класс очереди с приоритетами (упрощенная реализация на основе списка)
+// класс очереди с приоритетами (упрощенная реализация на основе списка)
 public class MyPriorityQueue
 {
     private List<Request> requests;
@@ -34,15 +34,15 @@ public class MyPriorityQueue
         requests = new List<Request>();
     }
 
-    // Добавление заявки в очередь
+    // добавление заявки в очередь
     public void Add(Request request)
     {
         requests.Add(request);
-        // Сортируем по убыванию приоритета для быстрого доступа к максимальному
+        // сортируем по убыванию приоритета для быстрого доступа к максимальному
         requests = requests.OrderByDescending(r => r.Priority).ThenBy(r => r.RequestId).ToList();
     }
 
-    // Удаление заявки с наивысшим приоритетом
+    // удаление заявки с наивысшим приоритетом
     public Request RemoveMax()
     {
         if (requests.Count == 0)
@@ -53,13 +53,13 @@ public class MyPriorityQueue
         return maxRequest;
     }
 
-    // Проверка пустоты очереди
+    // проверка пустоты очереди
     public bool IsEmpty()
     {
         return requests.Count == 0;
     }
 
-    // Получение количества заявок
+    // получение количества заявок
     public int Count()
     {
         return requests.Count;
@@ -72,71 +72,71 @@ public class Program
 
     public static void Main(string[] args)
     {
-        Console.WriteLine("=== Симулятор приоритетной очереди заявок ===");
+        Console.WriteLine("=== симулятор приоритетной очереди заявок ===");
 
-        // Ввод количества шагов
-        Console.Write("Введите количество шагов добавления заявок (N): ");
+        // ввод количества шагов
+        Console.Write("введите количество шагов добавления заявок (N): ");
         int N = int.Parse(Console.ReadLine());
 
-        // Инициализация очереди
+        // инициализация очереди
         MyPriorityQueue queue = new MyPriorityQueue();
-        int currentRequestId = 1;  // Счетчик заявок
-        Request maxWaitingRequest = null;  // Заявка с максимальным временем ожидания
-        int maxWaitingTime = 0;    // Максимальное время ожидания
+        int currentRequestId = 1;  // счетчик заявок
+        Request maxWaitingRequest = null;  // заявка с максимальным временем ожидания
+        int maxWaitingTime = 0;    // максимальное время ожидания
 
-        // Открываем файл для логирования
+        // открываем файл для логирования
         using (StreamWriter logFile = new StreamWriter("log.txt"))
         {
-            // Фаза добавления заявок (N шагов)
+            // фаза добавления заявок (N шагов)
             for (int step = 1; step <= N; step++)
             {
-                Console.WriteLine($"\n--- Шаг {step} ---");
+                Console.WriteLine($"\n--- шаг {step} ---");
 
-                // Генерация от 1 до 10 заявок
+                // генерация от 1 до 10 заявок
                 int requestsToAdd = random.Next(1, 11);
-                Console.WriteLine($"Добавляется заявок: {requestsToAdd}");
+                Console.WriteLine($"добавляется заявок: {requestsToAdd}");
 
-                // Добавление заявок
+                // добавление заявок
                 for (int i = 0; i < requestsToAdd; i++)
                 {
-                    int priority = random.Next(1, 6);  // Приоритет от 1 до 5
+                    int priority = random.Next(1, 6);  // приоритет от 1 до 5
                     Request newRequest = new Request(priority, currentRequestId, step);
                     queue.Add(newRequest);
 
-                    // Логирование добавления
+                    // логирование добавления
                     logFile.WriteLine($"ADD {currentRequestId} {priority} {step}");
-                    Console.WriteLine($"  Добавлена: {newRequest}");
+                    Console.WriteLine($"  добавлена: {newRequest}");
 
                     currentRequestId++;
                 }
 
-                // Удаление заявки с наивысшим приоритетом
+                // удаление заявки с наивысшим приоритетом
                 if (!queue.IsEmpty())
                 {
                     Request removedRequest = queue.RemoveMax();
-                    int waitingTime = step - removedRequest.StepAdded;  // Время ожидания
+                    int waitingTime = step - removedRequest.StepAdded;  // время ожидания
 
-                    // Проверка на максимальное время ожидания
+                    // проверка на максимальное время ожидания
                     if (waitingTime > maxWaitingTime)
                     {
                         maxWaitingTime = waitingTime;
                         maxWaitingRequest = removedRequest;
                     }
 
-                    // Логирование удаления
+                    // логирование удаления
                     logFile.WriteLine($"REMOVE {removedRequest.RequestId} {removedRequest.Priority} {step}");
-                    Console.WriteLine($"  Удалена: {removedRequest} (Время ожидания: {waitingTime} шагов)");
+                    Console.WriteLine($"  удалена: {removedRequest} (время ожидания: {waitingTime} шагов)");
                 }
                 else
                 {
-                    Console.WriteLine("  Очередь пуста - нечего удалять");
+                    Console.WriteLine("  очередь пуста - нечего удалять");
                 }
 
-                Console.WriteLine($"Заявок в очереди: {queue.Count()}");
+                Console.WriteLine($"заявок в очереди: {queue.Count()}");
             }
 
-            // Фаза очистки очереди (после N шагов)
-            Console.WriteLine($"\n--- Фаза очистки очереди ---");
+            // фаза очистки очереди (после N шагов)
+            Console.WriteLine($"\n--- фаза очистки очереди ---");
             int cleanupStep = N + 1;
 
             while (!queue.IsEmpty())
@@ -144,34 +144,34 @@ public class Program
                 Request removedRequest = queue.RemoveMax();
                 int waitingTime = cleanupStep - removedRequest.StepAdded;
 
-                // Проверка на максимальное время ожидания
+                // проверка на максимальное время ожидания
                 if (waitingTime > maxWaitingTime)
                 {
                     maxWaitingTime = waitingTime;
                     maxWaitingRequest = removedRequest;
                 }
 
-                // Логирование удаления
+                // логирование удаления
                 logFile.WriteLine($"REMOVE {removedRequest.RequestId} {removedRequest.Priority} {cleanupStep}");
-                Console.WriteLine($"Шаг {cleanupStep}: Удалена {removedRequest} (Время ожидания: {waitingTime} шагов)");
+                Console.WriteLine($"шаг {cleanupStep}: удалена {removedRequest} (время ожидания: {waitingTime} шагов)");
 
                 cleanupStep++;
             }
         }
 
-        // Вывод результата
-        Console.WriteLine("\n=== РЕЗУЛЬТАТЫ ===");
+        // вывод результата
+        Console.WriteLine("\n=== результаты ===");
         if (maxWaitingRequest != null)
         {
-            Console.WriteLine($"Заявка с максимальным временем ожидания:");
+            Console.WriteLine($"заявка с максимальным временем ожидания:");
             Console.WriteLine($"{maxWaitingRequest}");
-            Console.WriteLine($"Максимальное время ожидания: {maxWaitingTime} шагов");
+            Console.WriteLine($"максимальное время ожидания: {maxWaitingTime} шагов");
         }
         else
         {
-            Console.WriteLine("Не было обработано ни одной заявки");
+            Console.WriteLine("не было обработано ни одной заявки");
         }
 
-        Console.WriteLine($"Лог сохранен в файл: log.txt");
+        Console.WriteLine($"лог сохранен в файл: log.txt");
     }
 }
