@@ -13,7 +13,8 @@ public class MyPriorityQueue<T>
     {
         queue = new T[11];
         size = 0;
-        comparer = Comparer<T>.Default; // используем компаратор по умолчанию
+        comparer = Comparer<T>.Default;
+        Console.WriteLine("Создана пустая очередь с начальной ёмкостью 11");
     }
 
     // конструктор 2: очередь из массива
@@ -26,11 +27,12 @@ public class MyPriorityQueue<T>
         size = a.Length;
         comparer = Comparer<T>.Default;
 
-        // копируем элементы из входного массива
         Array.Copy(a, 0, queue, 1, a.Length);
+        Console.WriteLine($"Создана очередь из массива с {size} элементами");
 
-        // строим кучу из всех элементов
         BuildHeap();
+        Console.WriteLine("Построена куча из массива");
+        PrintHeap();
     }
 
     // конструктор 3: пустая очередь с указанной начальной ёмкостью
@@ -42,6 +44,7 @@ public class MyPriorityQueue<T>
         queue = new T[initialCapacity + 1];
         size = 0;
         comparer = Comparer<T>.Default;
+        Console.WriteLine($"Создана пустая очередь с ёмкостью {initialCapacity}");
     }
 
     // конструктор 4: пустая очередь с указанной ёмкостью и компаратором
@@ -53,6 +56,7 @@ public class MyPriorityQueue<T>
         queue = new T[initialCapacity + 1];
         size = 0;
         comparer = comparator ?? Comparer<T>.Default;
+        Console.WriteLine($"Создана пустая очередь с ёмкостью {initialCapacity} и пользовательским компаратором");
     }
 
     // конструктор 5: очередь из другой очереди
@@ -65,6 +69,8 @@ public class MyPriorityQueue<T>
         size = c.size;
         comparer = c.comparer;
         Array.Copy(c.queue, 0, queue, 0, c.queue.Length);
+        Console.WriteLine("Создана очередь копированием из другой очереди");
+        PrintHeap();
     }
 
     // добавление элемента в очередь
@@ -73,16 +79,21 @@ public class MyPriorityQueue<T>
         if (e == null)
             throw new ArgumentNullException(nameof(e));
 
-        // проверяем, нужно ли увеличить ёмкость
-        if (size >= queue.Length - 1)
-            Resize();
+        Console.WriteLine($"\nДобавление элемента: {e}");
 
-        // увеличиваем размер и добавляем элемент в конец
+        if (size >= queue.Length - 1)
+        {
+            Console.WriteLine($"Ёмкость увеличена с {queue.Length - 1} до {(queue.Length - 1 < 64 ? (queue.Length - 1) * 2 : (int)((queue.Length - 1) * 1.5))}");
+            Resize();
+        }
+
         size++;
         queue[size] = e;
+        Console.WriteLine($"Элемент добавлен в позицию {size}");
 
-        // поднимаем элемент на нужную позицию в куче
         Swim(size);
+        Console.WriteLine("Выполнено просеивание вверх");
+        PrintHeap();
     }
 
     // добавление всех элементов из массива
@@ -91,6 +102,7 @@ public class MyPriorityQueue<T>
         if (a == null)
             throw new ArgumentNullException(nameof(a));
 
+        Console.WriteLine($"\nДобавление {a.Length} элементов из массива");
         foreach (T item in a)
         {
             Add(item);
@@ -100,11 +112,13 @@ public class MyPriorityQueue<T>
     // очистка очереди
     public void Clear()
     {
+        Console.WriteLine("\nОчистка очереди");
         for (int i = 1; i <= size; i++)
         {
             queue[i] = default(T);
         }
         size = 0;
+        PrintHeap();
     }
 
     // проверка наличия элемента в очереди
@@ -112,11 +126,16 @@ public class MyPriorityQueue<T>
     {
         if (obj == null) return false;
 
+        Console.WriteLine($"\nПоиск элемента: {obj}");
         for (int i = 1; i <= size; i++)
         {
             if (obj.Equals(queue[i]))
+            {
+                Console.WriteLine($"Элемент найден в позиции {i}");
                 return true;
+            }
         }
+        Console.WriteLine("Элемент не найден");
         return false;
     }
 
@@ -126,18 +145,25 @@ public class MyPriorityQueue<T>
         if (a == null)
             throw new ArgumentNullException(nameof(a));
 
+        Console.WriteLine($"\nПроверка наличия всех {a.Length} элементов");
         foreach (T item in a)
         {
             if (!Contains(item))
+            {
+                Console.WriteLine("Не все элементы найдены");
                 return false;
+            }
         }
+        Console.WriteLine("Все элементы найдены");
         return true;
     }
 
     // проверка пустоты очереди
     public bool IsEmpty()
     {
-        return size == 0;
+        bool empty = size == 0;
+        Console.WriteLine($"Проверка пустоты: {(empty ? "очередь пуста" : "очередь не пуста")}");
+        return empty;
     }
 
     // удаление указанного элемента
@@ -145,25 +171,33 @@ public class MyPriorityQueue<T>
     {
         if (obj == null) return false;
 
-        // ищем элемент в очереди
+        Console.WriteLine($"\nУдаление элемента: {obj}");
+
         for (int i = 1; i <= size; i++)
         {
             if (obj.Equals(queue[i]))
             {
-                // заменяем удаляемый элемент последним
+                Console.WriteLine($"Элемент найден в позиции {i}");
+
                 queue[i] = queue[size];
                 queue[size] = default(T);
                 size--;
 
-                // восстанавливаем свойства кучи
+                Console.WriteLine($"Элемент из позиции {size + 1} перемещён в позицию {i}");
+
                 if (i <= size)
                 {
                     Swim(i);
                     Sink(i);
+                    Console.WriteLine("Выполнено восстановление кучи");
                 }
+
+                PrintHeap();
                 return true;
             }
         }
+
+        Console.WriteLine("Элемент не найден для удаления");
         return false;
     }
 
@@ -173,12 +207,14 @@ public class MyPriorityQueue<T>
         if (a == null)
             throw new ArgumentNullException(nameof(a));
 
+        Console.WriteLine($"\nУдаление {a.Length} указанных элементов");
         bool modified = false;
         foreach (T item in a)
         {
             if (Remove(item))
                 modified = true;
         }
+        Console.WriteLine($"Результат удаления: {(modified ? "были удалены элементы" : "элементы не найдены")}");
         return modified;
     }
 
@@ -188,38 +224,44 @@ public class MyPriorityQueue<T>
         if (a == null)
             throw new ArgumentNullException(nameof(a));
 
+        Console.WriteLine($"\nОставление только {a.Length} указанных элементов");
         bool modified = false;
-        // создаем временный список для элементов, которые нужно сохранить
         List<T> toRetain = new List<T>(a);
 
         for (int i = size; i >= 1; i--)
         {
             if (!toRetain.Contains(queue[i]))
             {
+                Console.WriteLine($"Удаление элемента {queue[i]} из позиции {i}");
                 Remove(queue[i]);
                 modified = true;
             }
         }
+        Console.WriteLine($"Результат операции: {(modified ? "очередь изменена" : "очередь не изменена")}");
         return modified;
     }
 
     // получение размера очереди
     public int Size()
     {
+        Console.WriteLine($"Текущий размер очереди: {size}");
         return size;
     }
 
     // преобразование в массив
     public T[] ToArray()
     {
+        Console.WriteLine("\nПреобразование очереди в массив");
         T[] result = new T[size];
         Array.Copy(queue, 1, result, 0, size);
+        Console.WriteLine($"Создан массив из {result.Length} элементов");
         return result;
     }
 
     // преобразование в массив с указанным типом
     public T[] ToArray(T[] a)
     {
+        Console.WriteLine("\nПреобразование очереди в существующий массив");
         if (a == null)
             return ToArray();
 
@@ -230,6 +272,7 @@ public class MyPriorityQueue<T>
         if (a.Length > size)
             a[size] = default(T);
 
+        Console.WriteLine($"Массив заполнен {size} элементами");
         return a;
     }
 
@@ -239,50 +282,67 @@ public class MyPriorityQueue<T>
         if (IsEmpty())
             throw new InvalidOperationException("очередь пуста");
 
-        return queue[1];
+        T element = queue[1];
+        Console.WriteLine($"Получен элемент из головы очереди: {element}");
+        return element;
     }
 
-    // попытка добавления элемента (всегда true для неограниченной очереди)
+    // попытка добавления элемента
     public bool Offer(T obj)
     {
+        Console.WriteLine($"\nПопытка добавления элемента: {obj}");
         try
         {
             Add(obj);
+            Console.WriteLine("Элемент успешно добавлен");
             return true;
         }
         catch
         {
+            Console.WriteLine("Не удалось добавить элемент");
             return false;
         }
     }
 
-    // получение элемента из головы без удаления (возвращает null если пусто)
+    // получение элемента из головы без удаления
     public T Peek()
     {
         if (IsEmpty())
+        {
+            Console.WriteLine("Попытка чтения из пустой очереди - возвращено значение по умолчанию");
             return default(T);
+        }
 
-        return queue[1];
+        T element = queue[1];
+        Console.WriteLine($"Просмотр головного элемента: {element}");
+        return element;
     }
 
     // удаление и возврат элемента из головы очереди
     public T Poll()
     {
         if (IsEmpty())
+        {
+            Console.WriteLine("Попытка извлечения из пустой очереди - возвращено значение по умолчанию");
             return default(T);
+        }
 
-        // сохраняем корневой элемент (максимальный/минимальный)
         T result = queue[1];
+        Console.WriteLine($"\nИзвлечение элемента: {result}");
 
-        // заменяем корень последним элементом
         queue[1] = queue[size];
         queue[size] = default(T);
         size--;
 
-        // восстанавливаем свойства кучи
-        if (size > 0)
-            Sink(1);
+        Console.WriteLine($"Элемент из позиции {size + 1} перемещён в корень");
 
+        if (size > 0)
+        {
+            Sink(1);
+            Console.WriteLine("Выполнено просеивание вниз");
+        }
+
+        PrintHeap();
         return result;
     }
 
@@ -302,19 +362,22 @@ public class MyPriorityQueue<T>
         queue = newQueue;
     }
 
-    // просеивание вверх (подъем элемента)
+    // просеивание вверх
     private void Swim(int k)
     {
+        Console.WriteLine($"Просеивание вверх элемента из позиции {k}");
         while (k > 1 && Compare(k / 2, k) < 0)
         {
+            Console.WriteLine($"Обмен элементов в позициях {k / 2} и {k}");
             Swap(k, k / 2);
             k = k / 2;
         }
     }
 
-    // просеивание вниз (опускание элемента)
+    // просеивание вниз
     private void Sink(int k)
     {
+        Console.WriteLine($"Просеивание вниз элемента из позиции {k}");
         while (2 * k <= size)
         {
             int j = 2 * k;
@@ -324,6 +387,7 @@ public class MyPriorityQueue<T>
             if (Compare(k, j) >= 0)
                 break;
 
+            Console.WriteLine($"Обмен элементов в позициях {k} и {j}");
             Swap(k, j);
             k = j;
         }
@@ -332,10 +396,13 @@ public class MyPriorityQueue<T>
     // построение кучи из всех элементов
     private void BuildHeap()
     {
+        Console.WriteLine("Начало построения кучи");
         for (int i = size / 2; i >= 1; i--)
         {
+            Console.WriteLine($"Обработка узла {i}");
             Sink(i);
         }
+        Console.WriteLine("Построение кучи завершено");
     }
 
     // сравнение двух элементов
@@ -351,6 +418,18 @@ public class MyPriorityQueue<T>
         queue[i] = queue[j];
         queue[j] = temp;
     }
+
+    // вывод текущего состояния кучи в консоль
+    public void PrintHeap()
+    {
+        Console.Write("Текущее состояние кучи: [");
+        for (int i = 1; i <= size; i++)
+        {
+            Console.Write(queue[i]);
+            if (i < size) Console.Write(", ");
+        }
+        Console.WriteLine("]");
+    }
 }
 
 // пример использования
@@ -358,23 +437,57 @@ public class Program
 {
     public static void Main()
     {
+        Console.WriteLine("=== ДЕМОНСТРАЦИЯ РАБОТЫ ПРИОРИТЕТНОЙ ОЧЕРЕДИ ===\n");
+
         // создаем очередь с приоритетами для целых чисел
+        Console.WriteLine("1. СОЗДАНИЕ ОЧЕРЕДИ");
         MyPriorityQueue<int> queue = new MyPriorityQueue<int>();
 
         // добавляем элементы
+        Console.WriteLine("\n2. ДОБАВЛЕНИЕ ЭЛЕМЕНТОВ");
         queue.Add(5);
         queue.Add(10);
         queue.Add(3);
         queue.Add(8);
 
-        Console.WriteLine("размер очереди: " + queue.Size());
-        Console.WriteLine("первый элемент: " + queue.Peek());
+        Console.WriteLine("\n3. ПРОВЕРКА ОПЕРАЦИЙ");
+        queue.Size();
+        queue.IsEmpty();
+        queue.Contains(8);
+        queue.Contains(15);
 
-        // извлекаем элементы в порядке приоритета
-        Console.WriteLine("извлеченные элементы:");
+        Console.WriteLine("\n4. ПРОСМОТР ЭЛЕМЕНТОВ");
+        queue.Peek();
+        queue.Element();
+
+        Console.WriteLine("\n5. ИЗВЛЕЧЕНИЕ ЭЛЕМЕНТОВ");
+        Console.WriteLine("Извлеченные элементы:");
         while (!queue.IsEmpty())
         {
-            Console.Write(queue.Poll() + " ");
+            int element = queue.Poll();
+            Console.WriteLine($"Извлечён: {element}");
         }
+
+        Console.WriteLine("\n6. РАБОТА С МАССИВАМИ");
+        int[] testArray = new int[] { 20, 5, 15, 25, 10 };
+        MyPriorityQueue<int> queueFromArray = new MyPriorityQueue<int>(testArray);
+
+        Console.WriteLine("\n7. ТЕСТИРОВАНИЕ РАЗЛИЧНЫХ ОПЕРАЦИЙ");
+        queueFromArray.Offer(30);
+        queueFromArray.Remove(15);
+        
+        int[] retainArray = new int[] { 10, 20, 30 };
+        queueFromArray.RetainAll(retainArray);
+
+        Console.WriteLine("\n8. ПРЕОБРАЗОВАНИЕ В МАССИВ");
+        int[] resultArray = queueFromArray.ToArray();
+        Console.Write("Результирующий массив: [");
+        foreach (var item in resultArray)
+        {
+            Console.Write(item + " ");
+        }
+        Console.WriteLine("]");
+
+        Console.WriteLine("\n=== ДЕМОНСТРАЦИЯ ЗАВЕРШЕНА ===");
     }
 }
